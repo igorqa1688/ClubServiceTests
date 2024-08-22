@@ -5,7 +5,7 @@ from requests import add_club, get_club_by_room_code_without_new_club
 
 
 # Только обязательные поля
-def test_add_club(grpc_channel):
+def test_add_club_required_field(grpc_channel):
     stub = club_service_pb2_grpc.ClubServiceGrpcStub(grpc_channel)
     room_code = generate_random_name(12)
     room_name = generate_random_name(12)
@@ -18,6 +18,66 @@ def test_add_club(grpc_channel):
     assert len(response.guid) == 36
     assert response.room_name == room_name
     assert response.room_code == room_code
+
+
+# Добавление клуба, room_code не заполнен
+def test_add_club_without_room_code(grpc_channel):
+    stub = club_service_pb2_grpc.ClubServiceGrpcStub(grpc_channel)
+    room_code = ""
+    room_name = generate_random_name(12)
+    try:
+        request = club_service_pb2.AddClubRequest(
+            room_code=room_code,
+            room_name=room_name)
+
+        response = stub.AddOrUpdateClub(request)
+
+        assert len(response.guid) == 0
+    except Exception as e:
+        status_code = e.code()
+        grpc_details = e.details()
+        assert status_code.value[0] == 3
+        assert grpc_details == "Room Code empty value not allowed"
+
+
+# Добавление клуба, передан несуществующий guid
+def test_add_club_with_nonexist_guid(grpc_channel):
+    stub = club_service_pb2_grpc.ClubServiceGrpcStub(grpc_channel)
+    room_code = generate_random_name(15)
+    room_name = generate_random_name(12)
+    nonexist_guid = generate_guid()
+
+    request = club_service_pb2.AddClubRequest(
+        room_code=room_code,
+        room_name=room_name,
+        guid = nonexist_guid)
+
+    response = stub.AddOrUpdateClub(request)
+
+    assert response.guid == nonexist_guid
+    assert response.room_name == room_name
+    assert response.room_code == room_code
+
+
+# Добавление клуба, room_name не заполнен
+def test_add_club_without_room_name(grpc_channel):
+    stub = club_service_pb2_grpc.ClubServiceGrpcStub(grpc_channel)
+    room_code = generate_random_name(12)
+    room_name = ""
+    try:
+        request = club_service_pb2.AddClubRequest(
+            room_code=room_code,
+            room_name=room_name)
+
+        response = stub.AddOrUpdateClub(request)
+
+        assert len(response.guid) == 0
+    except Exception as e:
+        status_code = e.code()
+        grpc_details = e.details()
+        assert status_code.value[0] == 3
+        print(grpc_details)
+        assert grpc_details == "Room Name empty value not allowed"
 
 
 # Добавление клуба с существующим room_code
