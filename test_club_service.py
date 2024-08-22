@@ -50,7 +50,7 @@ def test_add_club_with_nonexist_guid(grpc_channel):
     request = club_service_pb2.AddClubRequest(
         room_code=room_code,
         room_name=room_name,
-        guid = nonexist_guid)
+        guid=nonexist_guid)
 
     response = stub.AddOrUpdateClub(request)
 
