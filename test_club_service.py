@@ -64,20 +64,16 @@ def test_add_club_without_room_name(grpc_channel):
     stub = club_service_pb2_grpc.ClubServiceGrpcStub(grpc_channel)
     room_code = generate_random_name(12)
     room_name = ""
-    try:
-        request = club_service_pb2.AddClubRequest(
-            room_code=room_code,
-            room_name=room_name)
 
-        response = stub.AddOrUpdateClub(request)
+    request = club_service_pb2.AddClubRequest(
+        room_code=room_code,
+        room_name=room_name)
 
-        assert len(response.guid) == 0
-    except Exception as e:
-        status_code = e.code()
-        grpc_details = e.details()
-        assert status_code.value[0] == 3
-        print(grpc_details)
-        assert grpc_details == "Room Name empty value not allowed"
+    response = stub.AddOrUpdateClub(request)
+    print(response)
+    assert len(response.guid) == 36
+    assert response.room_code == room_code
+    assert len(response.room_name) == 0
 
 
 # Добавление клуба с существующим room_code
