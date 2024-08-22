@@ -1,0 +1,59 @@
+﻿syntax = "proto3";
+
+import "Protos/pagination.proto";
+
+option csharp_namespace = "ClubServiceGrpc";
+
+package club_service;
+
+service ClubServiceGrpc {
+	/*
+		if club with guid, room_code or room_id was created updates club name
+		else creates club with provided identifiers.
+
+		if provided guid and no club with room_code or room_id created generated new guid.
+	*/
+	rpc AddOrUpdateClub (AddClubRequest) returns (ClubResponse);
+
+	rpc GetClub (GetClubRequest) returns (ClubResponse);
+	rpc GetAllClubs (GetAllClubsRequest) returns (GetAllClubsResponse);
+}
+
+message AddClubRequest {
+	string room_code = 1; // Room club code. Empty value not allowed
+	string room_name = 2; // Room club name
+	optional string guid = 3; // Legacy club guid
+	optional string room_id = 4; // Legacy system doesn't support this field
+}
+
+message GetClubRequest {
+	oneof query {
+		string guid = 1; // Internal club id (guid)
+		string room_code = 2; // Room club code
+		string room_id = 3;
+	}
+}
+
+message GetAllClubsResponse {
+	repeated ClubResponse clubs = 1;
+	PaginationGrpc.PaginationResponseMessage pagination = 2;
+}
+
+message ClubResponse {
+	string guid = 1; // Internal club id (guid)
+	string room_code = 2; // Room club code
+	string room_name = 3; // Room club name
+	optional string room_id = 4; // Legacy system doesn't support this field
+}
+
+message ClubFilterMessage{
+	repeated string guids = 1;
+	repeated string room_codes = 2;
+	repeated string room_ids = 3;
+}
+
+message GetAllClubsRequest{
+	PaginationGrpc.PaginationRequestMessage pagination = 1;
+	optional ClubFilterMessage filter = 2;
+}
+

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+
+option csharp_namespace = "PaginationGrpc";
+
+package PaginationGrpc;
+
+message PaginationRequestMessage {
+	int32 per_page_count = 1;
+	int32 page = 2;
+}
+
+message PaginationResponseMessage {
+	google.protobuf.Int32Value next_page = 1;
+	google.protobuf.Int32Value previous_page = 2;
+	int32 total_pages = 3;
+}
